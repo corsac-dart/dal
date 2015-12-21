@@ -1,6 +1,5 @@
 library corsac_stateless.test.model;
 
-import 'package:corsac_call_stack/corsac_call_stack.dart';
 import 'package:corsac_stateless/corsac_stateless.dart';
 
 class User {
@@ -16,8 +15,8 @@ abstract class UserQueryModel {
 }
 
 class UserRepository extends Repository<User> implements UserQueryModel {
-  UserRepository(CallStack executionQueue, DataGateway storage)
-      : super(executionQueue, storage);
+  UserRepository(IdentityMap identityMap, DataGateway storage)
+      : super(identityMap, storage);
 }
 
 class UserInMemoryDataGateway extends InMemoryDataGateway<User>

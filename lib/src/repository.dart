@@ -45,35 +45,27 @@ abstract class StateListener {
 
 /// Generic repository for entities.
 class Repository<T> {
-  final CallStack callStack;
   final DataGateway<T> dataGateway;
+  final IdentityMap identityMap;
 
-  IdentityMap get _identityMap {
-    if (!callStack.currentFrame.state.containsKey('identityMap')) {
-      callStack.currentFrame.state['identityMap'] = new IdentityMap();
-    }
-
-    return callStack.currentFrame.state['identityMap'];
-  }
-
-  Repository(this.callStack, this.dataGateway);
+  Repository(this.identityMap, this.dataGateway);
 
   void add(T entity) {
-    if (_identityMap.has(T, entityId(entity)) || dataGateway.contains(entity)) {
+    if (identityMap.has(T, entityId(entity)) || dataGateway.contains(entity)) {
       throw new StateError('Entity already exists in repository.');
     }
 
     dataGateway.put(entity);
-    _identityMap.put(T, entityId(entity), entity);
+    identityMap.put(T, entityId(entity), entity);
   }
 
   T findById(dynamic id) {
-    if (!_identityMap.has(T, id)) {
+    if (!identityMap.has(T, id)) {
       var entity = dataGateway.findById(id);
-      _identityMap.put(T, id, entity);
+      identityMap.put(T, id, entity);
     }
 
-    return _identityMap.get(T, id);
+    return identityMap.get(T, id);
   }
 
   @override
@@ -106,10 +98,10 @@ class Repository<T> {
   /// exists then the instance from [IdentityMap] is returned. Otherwise new
   /// instance is added to [IdentityMap] and returned.
   T _ensureIdentity(T entity) {
-    if (_identityMap.has(T, entityId(entity))) {
-      return _identityMap.get(T, entityId(entity));
+    if (identityMap.has(T, entityId(entity))) {
+      return identityMap.get(T, entityId(entity));
     } else {
-      _identityMap.put(T, entityId(entity), entity);
+      identityMap.put(T, entityId(entity), entity);
       return entity;
     }
   }

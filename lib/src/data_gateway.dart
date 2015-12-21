@@ -7,6 +7,7 @@ part of corsac_stateless;
 abstract class DataGateway<T> {
   void put(T entity);
   bool contains(T entity);
+  T findById(dynamic id);
 }
 
 /// In-memory entity storage which can be used for testing and prototyping
