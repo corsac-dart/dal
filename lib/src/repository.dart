@@ -29,37 +29,6 @@ dynamic entityId(dynamic entity) {
   }
 }
 
-/// In-memory entity storage which can be used for testing and prototyping
-/// purposes.
-class InMemoryStorage<T> implements EntityStorage<T> {
-  Set<T> _items = new Set();
-
-  @override
-  void put(T entity) {
-    _items.add(entity);
-  }
-
-  @override
-  bool contains(T entity) {
-    return _items.contains(entity);
-  }
-
-  T findById(dynamic id) {
-    return _items.firstWhere((i) => entityId(i) == id);
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    var name = MirrorSystem.getName(invocation.memberName);
-    if (invocation.isMethod && name.startsWith('findBy')) {
-      var m = reflect(this);
-      print(m.type.superinterfaces);
-    } else {
-      return super.noSuchMethod(invocation);
-    }
-  }
-}
-
 abstract class StateSubscription {
   StateListener _stateListener;
 
@@ -77,7 +46,7 @@ abstract class StateListener {
 /// Generic repository for entities.
 class Repository<T> {
   final CallStack callStack;
-  final EntityStorage<T> storage;
+  final DataGateway<T> dataGateway;
 
   IdentityMap get _identityMap {
     if (!callStack.currentFrame.state.containsKey('identityMap')) {
@@ -87,29 +56,61 @@ class Repository<T> {
     return callStack.currentFrame.state['identityMap'];
   }
 
-  Repository(this.callStack, this.storage);
+  Repository(this.callStack, this.dataGateway);
 
   void add(T entity) {
-    if (_identityMap.has(T, entityId(entity)) || storage.contains(entity)) {
+    if (_identityMap.has(T, entityId(entity)) || dataGateway.contains(entity)) {
       throw new StateError('Entity already exists in repository.');
     }
 
-    storage.put(entity);
+    dataGateway.put(entity);
     _identityMap.put(T, entityId(entity), entity);
   }
 
   T findById(dynamic id) {
     if (!_identityMap.has(T, id)) {
-      var entity = storage.findById(id);
+      var entity = dataGateway.findById(id);
       _identityMap.put(T, id, entity);
     }
 
     return _identityMap.get(T, id);
   }
-}
 
-abstract class EntityStorage<T> {
-  void put(T entity);
-  bool contains(T entity);
-  T findById(id);
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    var result;
+    final mirror = reflect(dataGateway);
+    if (mirror.type.declarations.containsKey(invocation.memberName)) {
+      result = mirror
+          .invoke(invocation.memberName, invocation.positionalArguments,
+              invocation.namedArguments)
+          .reflectee;
+    } else {
+      result = dataGateway.noSuchMethod(invocation);
+    }
+
+    if (result is T) {
+      return _ensureIdentity(result);
+    } else if (result is Iterable) {
+      return result.map((i) => _ensureIdentity(i));
+    } else {
+      throw new StateError(
+          'Entity storage can only return instances of entity or collections of the same entity.');
+    }
+  }
+
+  /// Makes sure only one instance with the same ID returned from this
+  /// repository.
+  ///
+  /// Checks [IdentityMap] for an instance with the same ID. If it already
+  /// exists then the instance from [IdentityMap] is returned. Otherwise new
+  /// instance is added to [IdentityMap] and returned.
+  T _ensureIdentity(T entity) {
+    if (_identityMap.has(T, entityId(entity))) {
+      return _identityMap.get(T, entityId(entity));
+    } else {
+      _identityMap.put(T, entityId(entity), entity);
+      return entity;
+    }
+  }
 }

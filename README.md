@@ -11,7 +11,7 @@ There is no logic related to persisting domain objects. Even intermediate
 data (like state of Identity Map) is delegated to another experimental
 library [Corsac Call Stack](https://github.com/corsac-dart/call-stack).
 
-That is why "stateless".
+That is why "Stateless".
 
 ## Background and motivation
 
@@ -82,10 +82,11 @@ It is built on following core ideas:
 
 ## The approach
 
-First, the problem of storing IdentityMap state is delegated to the Call Stack library. So that this library knows nothing about the application's
+First, the problem of storing IdentityMap state is delegated to the Call Stack
+library. So that this library knows nothing about the application's
 life cycle.
 
-Given that repositories only need access to the state of currently
+Given that, repositories only need access to the state of currently
 executing "application transaction", that's all they need to know.
 
 The rest of the implementation is pretty much typical with added

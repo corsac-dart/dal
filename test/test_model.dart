@@ -10,7 +10,15 @@ class User {
   User(this.id, this.name);
 }
 
-class UserRepository extends Repository<User> {
-  UserRepository(CallStack executionQueue, EntityStorage storage)
+abstract class UserQueryModel {
+  User findById(int id);
+  User findByName(String name);
+}
+
+class UserRepository extends Repository<User> implements UserQueryModel {
+  UserRepository(CallStack executionQueue, DataGateway storage)
       : super(executionQueue, storage);
 }
+
+class UserInMemoryDataGateway extends InMemoryDataGateway<User>
+    implements UserQueryModel {}
