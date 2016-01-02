@@ -40,8 +40,8 @@ Object entityId(Object entity) {
 /// However in future versions it will be possible to mix-in more behaviors
 /// like:
 ///
-/// * [BatchOperations] - provides `batchGet(Set ids)` and `batchPut(Set entities)`.
-/// * [QueryOperations] - provides `find(Criteria criteria)`.
+/// * [BatchMixin] - provides `batchGet()` and `batchPut()`.
+/// * [FindMixin] - provides `find()` and `findOne()`.
 class Repository<T> {
   final DataGateway<T> dataGateway;
   final IdentityMap identityMap;
@@ -70,7 +70,7 @@ class Repository<T> {
 
 /// Mixin which can be added to repository implementations when batch
 /// operations (batchPut and batchGet) are needed.
-abstract class BatchOperations<T> {
+abstract class BatchMixin<T> {
   IdentityMap get identityMap;
   DataGateway<T> get dataGateway;
 
@@ -85,14 +85,53 @@ abstract class BatchOperations<T> {
   }
 }
 
-abstract class QueryOperations<T> {
+/// Mixin providing "filtering" capabilities. Designed to be used only by
+/// repositories.
+abstract class FindMixin<T> implements FindOperations<T> {
   IdentityMap get identityMap;
   DataGateway<T> get dataGateway;
 
-  Future find(Criteria criteria) {
-    // TODO: implement find.
-    return null;
+  @override
+  Future<T> findOne(Object criteria) async {
+    if (dataGateway is! FindOperations) {
+      throw new StateError('DataGateway must implement FindOperations.');
+    }
+
+    final entity = await (dataGateway as FindOperations).findOne(criteria);
+    final id = entityId(entity);
+    if (!identityMap.has(T, id)) {
+      identityMap.put(T, id, entity);
+    }
+
+    return identityMap.get(T, id);
+  }
+
+  @override
+  Future<Set<T>> find(Object criteria) async {
+    if (dataGateway is! FindOperations) {
+      throw new StateError('DataGateway must implement FindOperations.');
+    }
+
+    final entities = await (dataGateway as FindOperations).find(criteria);
+    final result = new Set<T>();
+    for (var entity in entities) {
+      var id = entityId(entity);
+      if (!identityMap.has(T, id)) {
+        identityMap.put(T, id, entity);
+      }
+      result.add(identityMap.get(T, id));
+    }
+
+    return result;
   }
 }
 
-class Criteria {}
+/// Interface for standard find operations. Should be implemented by
+/// data gateways.
+///
+/// The `criteria` parameter does not force any particular criteria interface
+/// so implementers are free to define their own.
+abstract class FindOperations<T> {
+  Future<T> findOne(Object criteria);
+  Future<Set<T>> find(Object criteria);
+}

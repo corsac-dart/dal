@@ -9,7 +9,7 @@ class User {
   User(this.id, this.name);
 }
 
-class UserRepository extends Repository<User> with BatchOperations<User> {
+class UserRepository extends Repository<User> with BatchMixin<User> {
   UserRepository(IdentityMap identityMap, DataGateway<User> storage)
       : super(identityMap, storage);
 }
