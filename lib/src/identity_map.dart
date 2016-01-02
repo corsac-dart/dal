@@ -1,6 +1,7 @@
 part of corsac_stateless;
 
-/// Identity Map keeps track of entities currently loaded into memory.
+/// Identity Map keeps track of entities loaded into memory within single
+/// business transaction.
 class IdentityMap {
   final Map _namespaces = new Map();
 
@@ -12,16 +13,16 @@ class IdentityMap {
     return _namespaces[type];
   }
 
-  void put(Type type, dynamic id, dynamic entity, [stateListener]) {
+  void put(Type type, Object id, Object entity) {
     final map = _getNamespace(type);
     map[id] = entity;
   }
 
-  bool has(Type type, dynamic id) {
+  bool has(Type type, Object id) {
     return _getNamespace(type).containsKey(id);
   }
 
-  dynamic get(Type type, dynamic id) {
+  Object get(Type type, Object id) {
     return _getNamespace(type)[id];
   }
 }

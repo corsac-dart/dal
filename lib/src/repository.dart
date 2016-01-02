@@ -19,90 +19,80 @@ const identity = const _Identity();
 /// does not exist it will check if there property annotated with `@identity`.
 ///
 /// If it can't find either it will throw `StateError`.
-dynamic entityId(dynamic entity) {
+Object entityId(Object entity) {
   final mirror = reflect(entity);
   if (mirror.type.declarations.containsKey(const Symbol('id'))) {
     return mirror.getField(const Symbol('id')).reflectee;
   } else {
+    // TODO: add support for @identity annotation.
     throw new StateError(
         'Can not determine entity identity (no field with name id)');
   }
 }
 
-abstract class StateSubscription {
-  StateListener _stateListener;
-
-  void set stateListener(StateListener stateListener) {
-    if (_stateListener is StateListener) throw new StateError(
-        'State listener is already set.');
-    _stateListener = stateListener;
-  }
-}
-
-abstract class StateListener {
-  void onStateChange(entity);
-}
-
 /// Generic repository for entities.
+///
+/// The repository is responsible for abstracting from used persistence
+/// technology as well as for caching entities in [IdentityMap] for current
+/// business transaction.
+///
+/// By default repositore implements only two basic operations: put and get.
+/// However in future versions it will be possible to mix-in more behaviors
+/// like:
+///
+/// * [BatchOperations] - provides `batchGet(Set ids)` and `batchPut(Set entities)`.
+/// * [QueryOperations] - provides `find(Criteria criteria)`.
 class Repository<T> {
   final DataGateway<T> dataGateway;
   final IdentityMap identityMap;
 
   Repository(this.identityMap, this.dataGateway);
 
-  void add(T entity) {
-    if (identityMap.has(T, entityId(entity)) || dataGateway.contains(entity)) {
-      throw new StateError('Entity already exists in repository.');
-    }
-
-    dataGateway.put(entity);
+  /// Puts entity in this repository. Here "put" means either insert and/or
+  /// update (sometimes also refered to as "upsert").
+  Future put(T entity) async {
+    await dataGateway.put(entity);
     identityMap.put(T, entityId(entity), entity);
   }
 
-  T findById(dynamic id) {
+  /// Returns entity specified by [id] from the repository.
+  ///
+  /// If no entity with provided [id] found, StateError will be thrown.
+  Future<T> get(Object id) async {
     if (!identityMap.has(T, id)) {
-      var entity = dataGateway.findById(id);
+      var entity = await dataGateway.get(id);
       identityMap.put(T, id, entity);
     }
 
     return identityMap.get(T, id);
   }
+}
 
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    var result;
-    final mirror = reflect(dataGateway);
-    if (mirror.type.declarations.containsKey(invocation.memberName)) {
-      result = mirror
-          .invoke(invocation.memberName, invocation.positionalArguments,
-              invocation.namedArguments)
-          .reflectee;
-    } else {
-      result = dataGateway.noSuchMethod(invocation);
-    }
+/// Mixin which can be added to repository implementations when batch
+/// operations (batchPut and batchGet) are needed.
+abstract class BatchOperations<T> {
+  IdentityMap get identityMap;
+  DataGateway<T> get dataGateway;
 
-    if (result is T) {
-      return _ensureIdentity(result);
-    } else if (result is Iterable) {
-      return result.map((i) => _ensureIdentity(i));
-    } else {
-      throw new StateError(
-          'Entity storage can only return instances of entity or collections of the same entity.');
-    }
+  Future batchPut(Set<T> entities) {
+    // TODO: implement batchPut.
+    return null;
   }
 
-  /// Makes sure only one instance with the same ID returned from this
-  /// repository.
-  ///
-  /// Checks [IdentityMap] for an instance with the same ID. If it already
-  /// exists then the instance from [IdentityMap] is returned. Otherwise new
-  /// instance is added to [IdentityMap] and returned.
-  T _ensureIdentity(T entity) {
-    if (identityMap.has(T, entityId(entity))) {
-      return identityMap.get(T, entityId(entity));
-    } else {
-      identityMap.put(T, entityId(entity), entity);
-      return entity;
-    }
+  Future<Set<T>> batchGet(Set<Object> ids) {
+    // TODO: implement batchGet.
+    return null;
   }
 }
+
+abstract class QueryOperations<T> {
+  IdentityMap get identityMap;
+  DataGateway<T> get dataGateway;
+
+  Future find(Criteria criteria) {
+    // TODO: implement find.
+    return null;
+  }
+}
+
+class Criteria {}

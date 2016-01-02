@@ -5,11 +5,11 @@ import 'package:corsac_stateless/corsac_stateless.dart';
 
 void main() {
   group('InMemoryDataGateway:', () {
-    test('it can filter entities by single field', () {
+    test('it can get entities by id', () async {
       var dg = new UserInMemoryDataGateway();
       dg.put(new User(1, 'John', 'Sales'));
       dg.put(new User(2, 'Mike', 'Sales'));
-      var user = dg.findByName('John');
+      var user = await dg.get(1);
       expect(user, new isInstanceOf<User>());
       expect(user.name, equals('John'));
     });
@@ -18,21 +18,7 @@ void main() {
         () {
       var dg = new UserInMemoryDataGateway();
       dg.put(new User(1, 'John', 'Sales'));
-      expect(() => dg.findByName('Bill'), throwsStateError);
-    });
-
-    test('it can return collections of entities', () {
-      var dg = new UserInMemoryDataGateway();
-      dg.put(new User(1, 'John', 'Sales'));
-      dg.put(new User(2, 'Mike', 'Sales'));
-      var productGuy = new User(3, 'Mike', 'Product');
-      dg.put(productGuy);
-      var result = dg.findByDepartment('Sales');
-      expect(result, new isInstanceOf<Iterable>());
-      expect(result, hasLength(2));
-      expect(result, isNot(contains(productGuy)));
-      expect(result.first.name, equals('John'));
-      expect(result.last.name, equals('Mike'));
+      expect(() => dg.get(2), throwsStateError);
     });
   });
 }
@@ -45,10 +31,4 @@ class User {
   User(this.id, this.name, this.department);
 }
 
-abstract class UserQueryModel {
-  User findByName(String name);
-  List<User> findByDepartment(String department);
-}
-
-class UserInMemoryDataGateway extends InMemoryDataGateway<User>
-    implements UserQueryModel {}
+class UserInMemoryDataGateway extends InMemoryDataGateway<User> {}

@@ -9,15 +9,9 @@ class User {
   User(this.id, this.name);
 }
 
-abstract class UserQueryModel {
-  User findById(int id);
-  User findByName(String name);
-}
-
-class UserRepository extends Repository<User> implements UserQueryModel {
-  UserRepository(IdentityMap identityMap, DataGateway storage)
+class UserRepository extends Repository<User> with BatchOperations<User> {
+  UserRepository(IdentityMap identityMap, DataGateway<User> storage)
       : super(identityMap, storage);
 }
 
-class UserInMemoryDataGateway extends InMemoryDataGateway<User>
-    implements UserQueryModel {}
+class UserInMemoryDataGateway extends InMemoryDataGateway<User> {}
