@@ -5,7 +5,7 @@ import 'package:corsac_stateless/corsac_stateless.dart';
 import 'test_model.dart';
 
 void main() {
-  group('Test model:', () {
+  group('Repository:', () {
     test('it stores entities', () async {
       var idMap = new IdentityMap();
       var dg = new UserInMemoryDataGateway();
@@ -24,4 +24,26 @@ void main() {
       expect(idMap.has(User, 1), isTrue);
     });
   });
+
+  group('Identity:', () {
+    test('it can fetch identity from `id` field', () {
+      var entity = new User(584, 'Example');
+      var id = entityId(entity);
+      expect(id, equals(584));
+    });
+
+    test('it can fetch identity from annotated field', () {
+      var entity = new Account('35342', 'Example');
+      var id = entityId(entity);
+      expect(id, equals('35342'));
+    });
+  });
+}
+
+class Account {
+  @identity
+  final String twitterId;
+  final String name;
+
+  Account(this.twitterId, this.name);
 }

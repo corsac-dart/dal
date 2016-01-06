@@ -15,19 +15,29 @@ const identity = const _Identity();
 
 /// Returns [entity] ID.
 ///
-/// By default it looks for a property with name `id`. If such property
-/// does not exist it will check if there property annotated with `@identity`.
+/// By default it looks for a field with name `id`. If such field
+/// does not exist it will check if there is a field annotated with `@identity`.
+///
+/// > Note that field with name `id` will have preference over annotation.
+/// > Though this behavior may be changed in future versions.
 ///
 /// If it can't find either it will throw `StateError`.
 Object entityId(Object entity) {
   final mirror = reflect(entity);
+
   if (mirror.type.declarations.containsKey(const Symbol('id'))) {
     return mirror.getField(const Symbol('id')).reflectee;
   } else {
-    // TODO: add support for @identity annotation.
-    throw new StateError(
-        'Can not determine entity identity (no field with name id)');
+    var annotatedField = mirror.type.declarations.values.firstWhere((_) {
+      return _ is VariableMirror && _.metadata.contains(reflect(identity));
+    }, orElse: () => null);
+
+    if (annotatedField is VariableMirror) {
+      return mirror.getField(annotatedField.simpleName).reflectee;
+    }
   }
+
+  throw new StateError('Can not determine entity identity');
 }
 
 /// Generic repository for entities.
