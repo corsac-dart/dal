@@ -7,7 +7,7 @@ import 'test_model.dart';
 void main() {
   group('Repository:', () {
     test('it stores entities', () async {
-      var idMap = new IdentityMap();
+      var idMap = new InMemoryIdentityMap();
       var dg = new UserInMemoryDataGateway();
       var repo = new UserRepository(idMap, dg);
 
@@ -17,7 +17,7 @@ void main() {
       expect(idMap.has(User, 1), isTrue);
       expect(idMap.get(User, 1), same(user));
 
-      idMap = new IdentityMap();
+      idMap = new InMemoryIdentityMap();
       repo = new UserRepository(idMap, dg);
       user = await repo.get(1);
       expect(user, new isInstanceOf<User>());
