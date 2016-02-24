@@ -42,6 +42,10 @@ class InMemoryIdentityMap implements IdentityMap {
   Object get(Type type, Object id) {
     return _getNamespace(type)[id];
   }
+
+  void flush() {
+    _namespaces.clear();
+  }
 }
 
 /// IdentityMap which stores its state in a zone-local value.
@@ -104,5 +108,35 @@ class ZoneLocalIdentityMap implements IdentityMap {
   @override
   Object get(Type type, Object id) {
     return _getNamespace(type)[id];
+  }
+}
+
+@proxy
+class IdentityMapCachingRepositoryDecorator implements Repository {
+  final IdentityMap identityMap;
+  final Repository repository;
+
+  IdentityMapCachingRepositoryDecorator(this.identityMap, this.repository);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    var result = reflect(repository).delegate(invocation);
+    if (result is Future) {
+      return result.then((entity) {
+        if (entity == null) {
+          return null;
+        }
+        var t = reflect(entity).type.reflectedType;
+        var id = entityId(entity);
+        if (!identityMap.has(t, id)) {
+          identityMap.put(t, id, entity);
+        }
+        return identityMap.get(t, id);
+      });
+    } else if (result is Stream) {
+      return result.transform(streamTransformer); // TODO: transform the stream.
+    } else {
+      return result;
+    }
   }
 }

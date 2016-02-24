@@ -37,103 +37,22 @@ Object entityId(Object entity) {
     }
   }
 
-  throw new StateError('Can not determine entity identity');
+  throw new StateError('Can not determine entity identity for ${entity}.');
 }
 
-/// Generic repository for entities.
+/// Generic repository interface.
 ///
-/// The repository is responsible for abstracting from used persistence
-/// technology as well as for caching entities in [IdentityMap] for current
-/// business transaction.
-///
-/// By default repositore implements only two basic operations: put and get.
-/// However in future versions it will be possible to mix-in more behaviors
-/// like:
-///
-/// * [BatchMixin] - provides `batchGet()` and `batchPut()`.
-/// * [FindMixin] - provides `find()` and `findOne()`.
-class Repository<T> {
-  final DataGateway<T> dataGateway;
-  final IdentityMap identityMap;
-
-  Repository(this.identityMap, this.dataGateway);
-
+/// The repository is responsible for abstracting from persistence
+/// technology.
+abstract class Repository<T> {
   /// Puts entity in this repository. Here "put" means either insert and/or
   /// update (sometimes also refered to as "upsert").
-  Future put(T entity) async {
-    await dataGateway.put(entity);
-    identityMap.put(T, entityId(entity), entity);
-  }
+  Future put(T entity);
 
   /// Returns entity specified by [id] from the repository.
   ///
   /// If no entity with provided [id] found, StateError will be thrown.
-  Future<T> get(Object id) async {
-    if (!identityMap.has(T, id)) {
-      var entity = await dataGateway.get(id);
-      identityMap.put(T, id, entity);
-    }
-
-    return identityMap.get(T, id);
-  }
-}
-
-/// Mixin which can be added to repository implementations when batch
-/// operations (batchPut and batchGet) are needed.
-abstract class BatchMixin<T> {
-  IdentityMap get identityMap;
-  DataGateway<T> get dataGateway;
-
-  Future batchPut(Set<T> entities) {
-    // TODO: implement batchPut.
-    return null;
-  }
-
-  Future<Set<T>> batchGet(Set<Object> ids) {
-    // TODO: implement batchGet.
-    return null;
-  }
-}
-
-/// Mixin providing "filtering" capabilities. Designed to be used only by
-/// repositories.
-abstract class FindMixin<T> implements FindOperations<T> {
-  IdentityMap get identityMap;
-  DataGateway<T> get dataGateway;
-
-  @override
-  Future<T> findOne(Object criteria) async {
-    if (dataGateway is! FindOperations) {
-      throw new StateError('DataGateway must implement FindOperations.');
-    }
-
-    final entity = await (dataGateway as FindOperations).findOne(criteria);
-    final id = entityId(entity);
-    if (!identityMap.has(T, id)) {
-      identityMap.put(T, id, entity);
-    }
-
-    return identityMap.get(T, id);
-  }
-
-  @override
-  Future<Set<T>> find(Object criteria) async {
-    if (dataGateway is! FindOperations) {
-      throw new StateError('DataGateway must implement FindOperations.');
-    }
-
-    final entities = await (dataGateway as FindOperations).find(criteria);
-    final result = new Set<T>();
-    for (var entity in entities) {
-      var id = entityId(entity);
-      if (!identityMap.has(T, id)) {
-        identityMap.put(T, id, entity);
-      }
-      result.add(identityMap.get(T, id));
-    }
-
-    return result;
-  }
+  Future<T> get(id);
 }
 
 /// Interface for standard find operations. Should be implemented by
@@ -143,5 +62,10 @@ abstract class FindMixin<T> implements FindOperations<T> {
 /// so implementers are free to define their own.
 abstract class FindOperations<T> {
   Future<T> findOne(Object criteria);
-  Future<Set<T>> find(Object criteria);
+  Stream<T> find(Object criteria);
+}
+
+abstract class BatchOperations<T> {
+  Future batchPut(Set<T> entities);
+  Stream<T> batchGet(Set ids);
 }

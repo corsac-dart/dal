@@ -2,6 +2,7 @@ library corsac_stateless.test.identity_map;
 
 import 'package:test/test.dart';
 import 'package:corsac_stateless/corsac_stateless.dart';
+import 'package:corsac_stateless/in_memory.dart';
 import 'dart:async';
 
 void main() {
@@ -27,6 +28,26 @@ void main() {
       runZoned(() {
         expect(map.has(User, 10), isFalse);
       }, zoneValues: map.zoneValues);
+    });
+  });
+
+  group('IdentityMapCachingRepositoryDecorator:', () {
+    test('it caches entities in identity map', () async {
+      var map = new InMemoryIdentityMap();
+      var repo = new InMemoryRepository();
+      var decoratedRepo = new IdentityMapCachingRepositoryDecorator(map, repo);
+      var user = new User(10, 'Ten');
+
+      decoratedRepo.put(user);
+      var fetchedUser = await decoratedRepo.get(10);
+      expect(fetchedUser, same(user));
+      expect(map.has(User, 10), isTrue);
+
+      map.flush();
+
+      var freshUser = await decoratedRepo.get(10);
+      expect(freshUser, same(user));
+      expect(map.has(User, 10), isTrue);
     });
   });
 }
