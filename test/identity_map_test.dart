@@ -34,8 +34,8 @@ void main() {
   group('IdentityMapCachingRepositoryDecorator:', () {
     test('it caches entities in identity map', () async {
       var map = new InMemoryIdentityMap();
-      var repo = new InMemoryRepository();
-      var decoratedRepo = new IdentityMapCachingRepositoryDecorator(map, repo);
+      var repo = new InMemoryRepository(User);
+      var decoratedRepo = new RepositoryIdentityCacheDecorator(map, repo);
       var user = new User(10, 'Ten');
 
       decoratedRepo.put(user);

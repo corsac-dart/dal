@@ -112,11 +112,11 @@ class ZoneLocalIdentityMap implements IdentityMap {
 }
 
 @proxy
-class IdentityMapCachingRepositoryDecorator implements Repository {
+class RepositoryIdentityCacheDecorator implements Repository {
   final IdentityMap identityMap;
   final Repository repository;
 
-  IdentityMapCachingRepositoryDecorator(this.identityMap, this.repository);
+  RepositoryIdentityCacheDecorator(this.identityMap, this.repository);
 
   @override
   dynamic noSuchMethod(Invocation invocation) {

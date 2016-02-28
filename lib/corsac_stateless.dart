@@ -1,7 +1,8 @@
 library corsac_stateless;
 
-import 'dart:mirrors';
 import 'dart:async';
+import 'dart:mirrors';
 
+part 'src/criteria.dart';
 part 'src/identity_map.dart';
 part 'src/repository.dart';
