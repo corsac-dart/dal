@@ -1,6 +1,4 @@
-library corsac_stateless.test.identity_map;
-
-import 'dart:async';
+library corsac_stateless.tests.criteria;
 
 import 'package:corsac_stateless/corsac_stateless.dart';
 import 'package:test/test.dart';

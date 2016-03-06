@@ -1,19 +1,19 @@
-library corsac_stateless.test.identity_map;
+library corsac_stateless.tests.identity_map;
 
-import 'package:test/test.dart';
-import 'package:corsac_stateless/corsac_stateless.dart';
-import 'package:corsac_stateless/in_memory.dart';
 import 'dart:async';
+
+import 'package:corsac_stateless/corsac_stateless.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('ZoneLocalIdentityMap:', () {
     test('it stores entities', () async {
       var map = new ZoneLocalIdentityMap(#identityMap);
       runZoned(() {
-        expect(map.has(User, 10), isFalse);
+        expect(map.contains(User, 10), isFalse);
         var user = new User(10, 'Ten');
         map.put(User, 10, user);
-        expect(map.has(User, 10), isTrue);
+        expect(map.contains(User, 10), isTrue);
         expect(map.get(User, 10), same(user));
       }, zoneValues: map.zoneValues);
     });
@@ -26,7 +26,7 @@ void main() {
       }, zoneValues: map.zoneValues);
 
       runZoned(() {
-        expect(map.has(User, 10), isFalse);
+        expect(map.contains(User, 10), isFalse);
       }, zoneValues: map.zoneValues);
     });
   });
@@ -34,20 +34,20 @@ void main() {
   group('IdentityMapCachingRepositoryDecorator:', () {
     test('it caches entities in identity map', () async {
       var map = new InMemoryIdentityMap();
-      var repo = new InMemoryRepository(User);
-      var decoratedRepo = new RepositoryIdentityCacheDecorator(map, repo);
+      var repo = new InMemoryRepository();
+      var decoratedRepo = new IdentityMapRepositoryDecorator(map, repo, User);
       var user = new User(10, 'Ten');
 
       decoratedRepo.put(user);
       var fetchedUser = await decoratedRepo.get(10);
       expect(fetchedUser, same(user));
-      expect(map.has(User, 10), isTrue);
+      expect(map.contains(User, 10), isTrue);
 
       map.flush();
 
       var freshUser = await decoratedRepo.get(10);
       expect(freshUser, same(user));
-      expect(map.has(User, 10), isTrue);
+      expect(map.contains(User, 10), isTrue);
     });
   });
 }

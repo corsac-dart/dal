@@ -7,15 +7,17 @@ abstract class IdentityMap {
   void put(Type type, Object id, Object entity);
 
   /// Returns true if entity exists in this identity map.
-  bool has(Type type, Object id);
+  bool contains(Type type, Object id);
 
   /// Fetches entity specified by [type] and [id] from this identity map.
+  ///
+  /// Returns `null` of entity is not in this identity map.
   Object get(Type type, Object id);
 }
 
 /// Simple "in-memory" implementation of IdentityMap.
 ///
-/// Stores it's state in a local [Map].
+/// Stores it's state in a local [Map]. Recommended for testing purposes only.
 class InMemoryIdentityMap implements IdentityMap {
   final Map _namespaces = new Map();
 
@@ -34,7 +36,7 @@ class InMemoryIdentityMap implements IdentityMap {
   }
 
   @override
-  bool has(Type type, Object id) {
+  bool contains(Type type, Object id) {
     return _getNamespace(type).containsKey(id);
   }
 
@@ -54,7 +56,7 @@ class InMemoryIdentityMap implements IdentityMap {
 /// functionality for executing business transactions.
 ///
 ///     void main() {
-///       var identityMap = new ZoneLocalIdentityMap();
+///       var identityMap = new ZoneLocalIdentityMap(#identiyMapCache);
 ///       runZoned(() {
 ///         identityMap.put(Entity, 'id', instance);
 ///       }, zoneValues: identityMap.zoneValues);
@@ -83,7 +85,7 @@ class ZoneLocalIdentityMap implements IdentityMap {
 
   Map _getNamespace(Type type) {
     if (Zone.current[key] == null) {
-      throw new StateError('ZoneLocalIdentityMap has not been initialized');
+      throw new StateError('ZoneLocalIdentityMap has not been initialized.');
     }
 
     Map state = Zone.current[key];
@@ -101,7 +103,7 @@ class ZoneLocalIdentityMap implements IdentityMap {
   }
 
   @override
-  bool has(Type type, Object id) {
+  bool contains(Type type, Object id) {
     return _getNamespace(type).containsKey(id);
   }
 
@@ -111,12 +113,43 @@ class ZoneLocalIdentityMap implements IdentityMap {
   }
 }
 
+/// Decorator for repositories responsible for caching of all entities loaded from
+/// storage in [IdentityMap].
+///
+/// Main purpose of using IdentityMap pattern is to prevent situations when the
+/// same entity is loaded in two (or more) different objects during single
+/// business transaction.
 @proxy
-class RepositoryIdentityCacheDecorator implements Repository {
+class IdentityMapRepositoryDecorator implements Repository {
   final IdentityMap identityMap;
   final Repository repository;
+  final Type entityType;
 
-  RepositoryIdentityCacheDecorator(this.identityMap, this.repository);
+  IdentityMapRepositoryDecorator(
+      this.identityMap, this.repository, this.entityType);
+
+  @override
+  Future get(id) {
+    // We implement this method explicitely for performance reasons, there is no
+    // need to make database lookup if entity is already in the IdentityMap.
+    if (!identityMap.contains(entityType, id)) {
+      return repository.get(id).then((entity) {
+        // TODO: race conditions possible here? Add test cases to check if it's in the map already?
+        if (entity != null) {
+          identityMap.put(entityType, id, entity);
+        }
+        return entity;
+      });
+    } else {
+      return new Future.value(identityMap.get(entityType, id));
+    }
+  }
+
+  @override
+  Future put(entity) {
+    identityMap.put(entityType, entityId(entity), entity);
+    return repository.put(entity);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
@@ -126,10 +159,9 @@ class RepositoryIdentityCacheDecorator implements Repository {
         if (entity == null) {
           return null;
         }
-        var t = reflect(entity).type.reflectedType;
         var id = entityId(entity);
-        if (!identityMap.has(t, id)) {
-          identityMap.put(t, id, entity);
+        if (!identityMap.contains(entityType, id)) {
+          identityMap.put(entityType, id, entity);
         }
         return identityMap.get(t, id);
       });
