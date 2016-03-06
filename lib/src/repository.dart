@@ -30,11 +30,9 @@ abstract class Repository<T> {
 
 /// Interface for standard find operations. Should be implemented by
 /// repositories.
-///
-// TODO: Update criteria to use own abstraction of criterias.
 abstract class FindOperations<T> {
-  Future<T> findOne(Object criteria);
-  Stream<T> find(Object criteria);
+  Future<T> findOne(Criteria criteria);
+  Stream<T> find(Criteria criteria);
 }
 
 /// Inteface for standard batch operations. Should be implemented by
@@ -42,25 +40,4 @@ abstract class FindOperations<T> {
 abstract class BatchOperations<T> {
   Future batchPut(Set<T> entities);
   Stream<T> batchGet(Set ids);
-}
-
-/// Repository which stores entities in memory.
-///
-// TODO: implement [FindOperations] and [BatchOperations].
-class InMemoryRepository<T> implements Repository<T> {
-  final Set items = new Set();
-
-  InMemoryRepository();
-
-  @override
-  Future get(id) {
-    var item = items.firstWhere((i) => entityId(i) == id, orElse: () => null);
-    return new Future.value(item);
-  }
-
-  @override
-  Future put(entity) {
-    items.add(entity);
-    return new Future.value();
-  }
 }
