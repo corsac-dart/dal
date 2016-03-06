@@ -1,0 +1,7 @@
+sudo: false
+
+language: dart
+
+script:
+  - pub run test -r expanded test/all.dart
+  - pub run dart_coveralls report -T --retry 2 test/all.dart
