@@ -26,18 +26,17 @@ abstract class Repository<T> {
   ///
   /// If no entity with provided [id] found returns `null`.
   Future<T> get(id);
-}
 
-/// Interface for standard find operations. Should be implemented by
-/// repositories.
-abstract class FindOperations<T> {
+  /// Finds entity matching provided [criteria].
   Future<T> findOne(Criteria criteria);
-  Stream<T> find(Criteria criteria);
-}
 
-/// Inteface for standard batch operations. Should be implemented by
-/// repositories.
-abstract class BatchOperations<T> {
+  /// Finds all entities matching provided [criteria].
+  Stream<T> find(Criteria criteria);
+
+  /// Puts [entities] in this repository. This will either add entities to this
+  /// repository or update them.
   Future batchPut(Set<T> entities);
+
+  /// Returns a stream containing all entities specified by [ids].
   Stream<T> batchGet(Set ids);
 }

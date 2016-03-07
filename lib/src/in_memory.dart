@@ -1,9 +1,7 @@
 part of corsac_stateless;
 
 /// Repository which stores entities in memory.
-///
-// TODO: implement [FindOperations] and [BatchOperations].
-class InMemoryRepository<T> implements Repository<T>, FindOperations<T> {
+class InMemoryRepository<T> implements Repository<T> {
   final Set items = new Set();
 
   InMemoryRepository();
@@ -37,6 +35,18 @@ class InMemoryRepository<T> implements Repository<T>, FindOperations<T> {
 
   @override
   Future<T> findOne(Criteria criteria) => find(criteria).first;
+
+  @override
+  Stream<T> batchGet(Set ids) {
+    return new Stream<T>.fromIterable(
+        items.where((i) => ids.contains(entityId(i))));
+  }
+
+  @override
+  Future batchPut(Set<T> entities) {
+    items.addAll(entities);
+    return new Future.value();
+  }
 }
 
 abstract class _Matcher {

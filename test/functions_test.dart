@@ -1,9 +1,9 @@
 library corsac_stateless.tests.functions;
 
-import 'package:test/test.dart';
-import 'package:corsac_stateless/corsac_stateless.dart';
-import 'dart:async';
 import 'dart:mirrors';
+
+import 'package:corsac_stateless/corsac_stateless.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('Identity:', () {
@@ -65,10 +65,7 @@ class Account {
 
 class UserRepo implements Repository<User> {
   @override
-  Future<User> get(id) => null;
-
-  @override
-  Future put(User entity) => null;
+  noSuchMethod(Invocation invocation) {}
 }
 
 @proxy

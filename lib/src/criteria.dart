@@ -24,7 +24,7 @@ class EqualsCondition implements Condition {
 
 /// Criteria provides a way to filter entities fetched from [Repository] based
 /// on certain conditions. Used in `findOne` and `find` methods of
-/// [FindOperations] interface.
+/// [Repository] interface.
 class Criteria<T> {
   final List<Condition> conditions = new List();
   int skip;

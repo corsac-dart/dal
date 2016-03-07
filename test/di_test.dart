@@ -67,7 +67,7 @@ class User {}
 
 class Account {}
 
-abstract class UserRepository implements Repository<User>, BatchOperations {}
+abstract class UserRepository implements Repository<User> {}
 
 class UserIdentityMapRepositoryDecorator extends IdentityMapRepositoryDecorator
     implements UserRepository {
