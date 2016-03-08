@@ -163,7 +163,7 @@ class IdentityMapRepositoryDecorator implements Repository {
         if (!identityMap.contains(entityType, id)) {
           identityMap.put(entityType, id, entity);
         }
-        return identityMap.get(t, id);
+        return identityMap.get(entityType, id);
       });
     } else if (result is Stream) {
       return result.transform(streamTransformer); // TODO: transform the stream.
