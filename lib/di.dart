@@ -7,9 +7,11 @@ import 'package:corsac_di/corsac_di.dart';
 import 'package:corsac_stateless/corsac_stateless.dart';
 
 bool isRepositoryType(id) {
-  return (id is Type) &&
-      reflectType(id).isSubtypeOf(reflectType(Repository)) &&
-      reflectClass(id).superinterfaces.isEmpty;
+  if (id is! Type) return false;
+  var cm = reflectClass(id);
+  return cm.isSubtypeOf(reflectType(Repository)) &&
+      cm.superclass.reflectedType == Object &&
+      cm.superinterfaces.isEmpty;
 }
 
 class IdentityMapDIMiddleware implements DIMiddleware {

@@ -8,6 +8,17 @@ import 'package:corsac_stateless/di.dart';
 import 'package:test/test.dart';
 
 void main() {
+  group('Repository types:', () {
+    test(
+        'only reference to Repository interface directly is treated as a valid type',
+        () {
+      expect(isRepositoryType(Repository), isTrue);
+      expect(isRepositoryType(const diType<Repository<User>>().type), isTrue);
+      expect(isRepositoryType(UserRepository), isFalse);
+      expect(isRepositoryType(UserMysqlRepository), isFalse);
+    });
+  });
+
   group('In-memory Repository Container Middleware', () {
     test('it resolves repositories to in-memory implementation', () {
       var m = new InMemoryRepositoryDIMiddleware();
@@ -59,6 +70,10 @@ class User {}
 class Account {}
 
 abstract class UserRepository implements Repository<User> {}
+
+class UserMysqlRepository extends UserRepository {
+  @override noSuchMethod(Invocation invocation) {}
+}
 
 class UserIdentityMapRepositoryDecorator extends IdentityMapRepositoryDecorator
     implements UserRepository {
