@@ -44,11 +44,3 @@ Type getEntityType(Type repositoryType) {
         .reflectedType;
   }
 }
-
-/// Checks if provided argument is a [Type] and if this type implements
-/// [Repository] interface.
-bool isRepositoryType(id) {
-  return (id is Type)
-      ? reflectType(id).isSubtypeOf(reflectType(Repository))
-      : false;
-}

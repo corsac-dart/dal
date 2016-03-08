@@ -6,24 +6,16 @@ import 'dart:mirrors';
 import 'package:corsac_di/corsac_di.dart';
 import 'package:corsac_stateless/corsac_stateless.dart';
 
-class RepositoryConfiguration {
-  final Map<Type, Type> types = new Map();
-  void registerRepositoryType(
-      Type repositoryType, Type identityMapDecoratorType) {
-    if (getEntityType(repositoryType) == dynamic) {
-      throw "Entity type of repository can not be dynamic. Please provide concrete type.";
-    }
-    types[repositoryType] = identityMapDecoratorType;
-  }
+bool isRepositoryType(id) {
+  return (id is Type) &&
+      reflectType(id).isSubtypeOf(reflectType(Repository)) &&
+      reflectClass(id).superinterfaces.isEmpty;
 }
 
 class IdentityMapDIMiddleware implements DIMiddleware {
   final IdentityMap identityMap;
-  final RepositoryConfiguration config;
 
-  Map<Type, Repository> _repositoryByEntityType = new Map();
-
-  IdentityMapDIMiddleware(this.identityMap, this.config);
+  IdentityMapDIMiddleware(this.identityMap);
 
   @override
   resolve(id, DIMiddlewarePipeline next) {
@@ -31,38 +23,19 @@ class IdentityMapDIMiddleware implements DIMiddleware {
       return next.resolve(id);
     }
 
-    var mirror = reflectType(id);
     var entityType = getEntityType(id);
     if (entityType == dynamic) {
-      throw "Entity type of repository can not be dynamic. Please provide concrete type.";
-    }
-
-    if (_repositoryByEntityType.containsKey(entityType)) {
-      var existingRepo = _repositoryByEntityType[entityType];
-      throw "Repository for entity ${id} already exists. Existing repository type is ${existingRepo}, you provided ${id}.";
+      throw new ArgumentError(
+          "Entity type of repository can not be dynamic. Please provide concrete type.");
     }
 
     var entry = next.resolve(id);
-
-    if (mirror.superinterfaces.isEmpty) {
-      // means it's base Repository<T> interface
-      _repositoryByEntityType[entityType] = entry;
-
-      return new IdentityMapRepositoryDecorator(identityMap, entry, entityType);
-    } else if (config.types.containsKey(id)) {
-      _repositoryByEntityType[entityType] = entry;
-      var decoratorMirror = reflectClass(config.types[id]);
-
-      return decoratorMirror
-          .newInstance(const Symbol(""), [identityMap, entry]).reflectee;
-    } else {
-      throw "Could not decorate repository type ${id}. Should be registered with RepositoryConfiguration.";
-    }
+    return new IdentityMapRepositoryDecorator(identityMap, entry, entityType);
   }
 }
 
 /// Replaces all repositories requested from the DI container with
-/// [InMemoryRepository] implementation which can be used for early development
+/// [InMemoryRepository] implementation which can be used in early development
 /// and/or in tests.
 class InMemoryRepositoryDIMiddleware implements DIMiddleware {
   @override

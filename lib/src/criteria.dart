@@ -40,7 +40,7 @@ class Criteria<T> {
 
   void where(bool test(T entity)) {
     var entity = new _EntityStub<T>();
-    test(entity);
+    test(entity); // dynamic proxies... where are you?
     conditions.addAll(entity.conditions);
   }
 }

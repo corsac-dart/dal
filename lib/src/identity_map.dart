@@ -120,9 +120,10 @@ class ZoneLocalIdentityMap implements IdentityMap {
 /// same entity is loaded in two (or more) different objects during single
 /// business transaction.
 @proxy
-class IdentityMapRepositoryDecorator implements Repository {
+class IdentityMapRepositoryDecorator<T> implements Repository<T> {
   final IdentityMap identityMap;
   final Repository repository;
+  // TODO: get rid of this when reflectClass supports generics.
   final Type entityType;
 
   IdentityMapRepositoryDecorator(

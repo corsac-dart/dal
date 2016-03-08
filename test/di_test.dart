@@ -17,49 +17,39 @@ void main() {
     });
   });
 
-  group('IdentityMapContainerMiddleware:', () {
+  group('IdentityMapDIMiddleware:', () {
     IdentityMap idMap;
     DIContainer container;
 
     setUp(() {
+      var config = {
+        const diType<Repository<Account>>():
+            DI.get(const diType<InMemoryRepository<Account>>()),
+      };
       idMap = new InMemoryIdentityMap();
-      container = new DIContainer();
-      var config = new RepositoryConfiguration();
-      config.registerRepositoryType(
-          UserRepository, UserIdentityMapRepositoryDecorator);
-      container.addMiddleware(new IdentityMapDIMiddleware(idMap, config));
-      container.addMiddleware(new InMemoryRepositoryDIMiddleware());
+      container = new DIContainer.build([config]);
+      container.addMiddleware(new IdentityMapDIMiddleware(idMap));
     });
 
     test('it decorates repositories with identity caching decorator', () {
-      execute((Repository<User> repo, Repository<Account> repo2) {
+      execute((Repository<Account> repo) {
         expect(repo, new isInstanceOf<IdentityMapRepositoryDecorator>());
-        expect(repo2, new isInstanceOf<IdentityMapRepositoryDecorator>());
-        expect(repo, isNot(same(repo2)));
+        expect((repo as IdentityMapRepositoryDecorator).repository,
+            new isInstanceOf<InMemoryRepository<Account>>());
       }, container);
     });
 
-    test('it only allows one repository implementation per entity type', () {
+    // May change in the future!
+    test('it does not resolve subclasses of repository interface', () {
       expect(() {
-        execute((Repository<User> repo, UserRepository repo2) {
-          print(repo);
-          print(repo2);
-        }, container);
+        execute((UserRepository repo2) {}, container);
       }, throws);
-    });
-
-    test('it supports subclasses of repository interface via configuration.',
-        () {
-      execute((Repository<Account> repo, UserRepository repo2) {
-        expect(repo, new isInstanceOf<IdentityMapRepositoryDecorator>());
-        expect(repo2, new isInstanceOf<UserIdentityMapRepositoryDecorator>());
-      }, container);
     });
 
     test('it does not allow dynamic type argument on repositories', () {
       expect(() {
         execute((Repository repo) {}, container);
-      }, throws);
+      }, throwsArgumentError);
     });
   });
 }
