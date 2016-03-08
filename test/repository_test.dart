@@ -35,6 +35,13 @@ void main() {
       expect(user, new isInstanceOf<User>());
       expect(user.id, 1);
     });
+
+    test('it returns null in findOne if entity not found', () async {
+      var criteria = new Criteria<User>();
+      criteria.where((u) => u.id == 24353);
+      var result = await repo.findOne(criteria);
+      expect(result, isNull);
+    });
   });
 }
 

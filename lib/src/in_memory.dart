@@ -34,7 +34,9 @@ class InMemoryRepository<T> implements Repository<T> {
   }
 
   @override
-  Future<T> findOne(Criteria criteria) => find(criteria).first;
+  Future<T> findOne(Criteria criteria) => find(criteria)
+      .first
+      .catchError((_) => null, test: (error) => error is StateError);
 
   @override
   Stream<T> batchGet(Set ids) {
