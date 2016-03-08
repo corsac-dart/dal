@@ -53,7 +53,7 @@ abstract class _Matcher {
   bool match(entity);
 
   factory _Matcher.createMatcherFor(Condition condition) {
-    if (condition is EqualsCondition) {
+    if (condition.predicate == ConditionPredicate.equals) {
       return new _EqualsMatcher(condition);
     } else {
       throw new ArgumentError(
@@ -63,7 +63,7 @@ abstract class _Matcher {
 }
 
 class _EqualsMatcher implements _Matcher {
-  final EqualsCondition condition;
+  final Condition condition;
 
   _EqualsMatcher(this.condition);
 

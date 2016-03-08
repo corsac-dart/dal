@@ -10,10 +10,11 @@ void main() {
       criteria.where((u) => u.id == 1);
       expect(criteria.conditions, isNotEmpty);
       expect(criteria.conditions, hasLength(1));
-      EqualsCondition c = criteria.conditions.first;
-      expect(c, new isInstanceOf<EqualsCondition>());
+      Condition c = criteria.conditions.first;
+      expect(c, new isInstanceOf<Condition>());
       expect(c.key, equals('id'));
       expect(c.value, equals(1));
+      expect(c.predicate, equals(ConditionPredicate.equals));
     });
   });
 }

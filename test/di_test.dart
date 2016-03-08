@@ -11,9 +11,10 @@ void main() {
   group('In-memory Repository Container Middleware', () {
     test('it resolves repositories to in-memory implementation', () {
       var m = new InMemoryRepositoryDIMiddleware();
-      var result = m.resolve(Repository, null);
+      var t = const diType<Repository<User>>();
+      var result = m.resolve(t.type, null);
       expect(result, new isInstanceOf<InMemoryRepository>());
-    }, skip: 'todo');
+    });
   });
 
   group('IdentityMapContainerMiddleware:', () {

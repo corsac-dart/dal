@@ -6,20 +6,28 @@ class CriteriaError {
   CriteriaError(this.message);
 }
 
-/// Base interface for criteria conditions.
-abstract class Condition {
-  String get key;
-  dynamic get value;
+/// List of valid predicates for conditions.
+abstract class ConditionPredicate {
+  static const String equals = '=';
+  static const String notEquals = '<>';
+  static const String greaterThan = '>';
+  static const String greaterThanOrEqual = '>=';
+  static const String lessThan = '<';
+  static const String lessThanOrEqual = '<=';
+  static const String inList = 'IN';
+  static const String between = 'BETWEEN';
+  static const String like = 'LIKE';
 }
 
-/// Condition for field equality.
-class EqualsCondition implements Condition {
-  @override
-  final String key;
-  @override
-  final dynamic value;
+/// Condition for [Criteria].
+class Condition {
+  String key;
+  dynamic value;
+  String predicate;
 
-  EqualsCondition(this.key, this.value);
+  Condition(this.key, this.value, this.predicate);
+
+  @override toString() => "Condition(${key} ${predicate} $value)";
 }
 
 /// Criteria provides a way to filter entities fetched from [Repository] based
@@ -69,6 +77,7 @@ abstract class FieldStub {
   List<Condition> get conditions;
 }
 
+// TODO: implement all predicates.
 @proxy
 class _FieldStub implements FieldStub {
   final String name;
@@ -76,8 +85,14 @@ class _FieldStub implements FieldStub {
 
   _FieldStub(this.name);
 
+  @override
   bool operator ==(other) {
-    conditions.add(new EqualsCondition(name, other));
+    conditions.add(new Condition(name, other, ConditionPredicate.equals));
+    return true;
+  }
+
+  bool operator >(other) {
+    conditions.add(new Condition(name, other, ConditionPredicate.greaterThan));
     return true;
   }
 }
