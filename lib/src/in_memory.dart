@@ -19,7 +19,7 @@ class InMemoryRepository<T> implements Repository<T> {
   }
 
   @override
-  Stream<T> find(Criteria criteria) {
+  Stream<T> find(Criteria<T> criteria) {
     var filtered = items.where((i) {
       for (var c in criteria.conditions) {
         var matcher = new _Matcher.createMatcherFor(c);
@@ -30,11 +30,14 @@ class InMemoryRepository<T> implements Repository<T> {
       return true;
     });
 
+    if (criteria.skip is int) filtered = filtered.skip(criteria.skip);
+    if (criteria.take is int) filtered = filtered.take(criteria.take);
+
     return new Stream<T>.fromIterable(filtered);
   }
 
   @override
-  Future<T> findOne(Criteria criteria) => find(criteria)
+  Future<T> findOne(Criteria<T> criteria) => find(criteria)
       .first
       .catchError((_) => null, test: (error) => error is StateError);
 
@@ -49,13 +52,26 @@ class InMemoryRepository<T> implements Repository<T> {
     items.addAll(entities);
     return new Future.value();
   }
+
+  @override
+  Future<int> count([Criteria<T> criteria]) {
+    if (criteria is Criteria) {
+      var tmpCriteria = new Criteria<T>.from(criteria);
+      tmpCriteria
+        ..skip = null
+        ..take = null;
+      return find(tmpCriteria).length;
+    } else {
+      return new Future.value(items.length);
+    }
+  }
 }
 
 abstract class _Matcher {
   bool match(entity);
 
   factory _Matcher.createMatcherFor(Condition condition) {
-    if (condition.predicate == ConditionPredicate.equals) {
+    if (condition.predicate == Condition.EQ) {
       return new _EqualsMatcher(condition);
     } else {
       throw new ArgumentError(

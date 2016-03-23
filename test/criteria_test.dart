@@ -14,7 +14,7 @@ void main() {
       expect(c, new isInstanceOf<Condition>());
       expect(c.key, equals('id'));
       expect(c.value, equals(1));
-      expect(c.predicate, equals(ConditionPredicate.equals));
+      expect(c.predicate, equals(Condition.EQ));
     });
   });
 }

@@ -24,14 +24,19 @@ abstract class Repository<T> {
 
   /// Returns entity specified by [id] from the repository.
   ///
-  /// If no entity with provided [id] found returns `null`.
+  /// Returns `null` if there is no such entity.
   Future<T> get(id);
 
   /// Finds entity matching provided [criteria].
-  Future<T> findOne(Criteria criteria);
+  Future<T> findOne(Criteria<T> criteria);
 
   /// Finds all entities matching provided [criteria].
-  Stream<T> find(Criteria criteria);
+  Stream<T> find(Criteria<T> criteria);
+
+  /// Returns total number of items in this repository. If [criteria] is
+  /// provided then returns total number of items satisfying this criteria
+  /// (the `skip` and `take` fields of criteria are ignored).
+  Future<int> count([Criteria<T> criteria]);
 
   /// Puts [entities] in this repository. This will either add entities to this
   /// repository or update them.

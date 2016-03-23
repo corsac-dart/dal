@@ -6,38 +6,60 @@ class CriteriaError {
   CriteriaError(this.message);
 }
 
-/// List of valid predicates for conditions.
-abstract class ConditionPredicate {
-  static const String equals = '=';
-  static const String notEquals = '<>';
-  static const String greaterThan = '>';
-  static const String greaterThanOrEqual = '>=';
-  static const String lessThan = '<';
-  static const String lessThanOrEqual = '<=';
-  static const String inList = 'IN';
-  static const String between = 'BETWEEN';
-  static const String like = 'LIKE';
-}
-
 /// Condition for [Criteria].
 class Condition {
+  static const String EQ = '=';
+  static const String NE = '<>';
+  static const String GT = '>';
+  static const String GTE = '>=';
+  static const String LT = '<';
+  static const String LTE = '<=';
+  static const String IN = 'IN';
+  static const String BETWEEN = 'BETWEEN';
+  static const String LIKE = 'LIKE';
+  static const String MATCHES = 'MATCHES';
+
   String key;
   dynamic value;
   String predicate;
 
   Condition(this.key, this.value, this.predicate);
 
-  @override toString() => "Condition(${key} ${predicate} $value)";
+  @override
+  toString() => "Condition(${key} ${predicate} $value)";
 }
 
 /// Criteria provides a way to filter entities fetched from [Repository] based
-/// on certain conditions. Used in `findOne` and `find` methods of
+/// on certain conditions. Used in `findOne`, `find` and `count` methods of
 /// [Repository] interface.
 class Criteria<T> {
   final List<Condition> conditions = new List();
   int skip;
   int take;
 
+  /// Default constructor.
+  Criteria();
+
+  /// Creates new criteria as a copy of [other].
+  factory Criteria.from(Criteria<T> other) {
+    return new Criteria<T>()
+      ..conditions.addAll(other.conditions)
+      ..skip = other.skip
+      ..take = other.take;
+  }
+
+  /// Adds a condition to this criteria. Provides convenient way for defining
+  /// basic conditions (`==`, `<`, `<=`, `>`, `>=`) based on values of entity
+  /// fields.
+  ///
+  ///     var criteria = new Criteria<User>();
+  ///     criteria.where((user) => user.name == 'John');
+  ///
+  /// The above example will add an "equals" condition to the criteria. It is
+  /// basically a "sugar" syntax for:
+  ///
+  ///     var criteria = new Criteria<User>();
+  ///     criteria.conditions.add(new Condition('name', 'John', Condition.EQ));
   void where(bool test(T entity)) {
     var entity = new _EntityStub<T>();
     test(entity); // dynamic proxies... where are you?
@@ -52,6 +74,7 @@ class _EntityStub<T> {
 
   @override
   noSuchMethod(Invocation invocation) {
+    // TODO: validate that field name actually exists in `T`.
     if (invocation.isGetter) {
       var field = new _FieldStub(MirrorSystem.getName(invocation.memberName));
       fields.add(field);
@@ -77,7 +100,7 @@ abstract class FieldStub {
   List<Condition> get conditions;
 }
 
-// TODO: implement all predicates.
+// TODO: implement all possible operators.
 @proxy
 class _FieldStub implements FieldStub {
   final String name;
@@ -87,12 +110,27 @@ class _FieldStub implements FieldStub {
 
   @override
   bool operator ==(other) {
-    conditions.add(new Condition(name, other, ConditionPredicate.equals));
+    conditions.add(new Condition(name, other, Condition.EQ));
     return true;
   }
 
   bool operator >(other) {
-    conditions.add(new Condition(name, other, ConditionPredicate.greaterThan));
+    conditions.add(new Condition(name, other, Condition.GT));
+    return true;
+  }
+
+  bool operator >=(other) {
+    conditions.add(new Condition(name, other, Condition.GTE));
+    return true;
+  }
+
+  bool operator <(other) {
+    conditions.add(new Condition(name, other, Condition.LT));
+    return true;
+  }
+
+  bool operator <=(other) {
+    conditions.add(new Condition(name, other, Condition.LTE));
     return true;
   }
 }
