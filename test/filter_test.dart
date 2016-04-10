@@ -1,16 +1,16 @@
-library corsac_dal.tests.criteria;
+library corsac_dal.tests.filter;
 
 import 'package:corsac_dal/corsac_dal.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('Criteria:', () {
+  group('Filter:', () {
     test('it builds conditions', () async {
-      var criteria = new Criteria<User>();
-      criteria.where((u) => u.id == 1);
-      expect(criteria.conditions, isNotEmpty);
-      expect(criteria.conditions, hasLength(1));
-      Condition c = criteria.conditions.first;
+      var filter = new Filter<User>();
+      filter.where((u) => u.id == 1);
+      expect(filter.conditions, isNotEmpty);
+      expect(filter.conditions, hasLength(1));
+      Condition c = filter.conditions.first;
       expect(c, new isInstanceOf<Condition>());
       expect(c.key, equals('id'));
       expect(c.value, equals(1));

@@ -1,12 +1,12 @@
 part of corsac_dal;
 
-/// Error thrown for invalid operations in [Criteria].
-class CriteriaError {
+/// Error thrown for invalid operations in [Filter].
+class FilterError {
   final String message;
-  CriteriaError(this.message);
+  FilterError(this.message);
 }
 
-/// Condition for [Criteria].
+/// Condition for [Filter].
 class Condition {
   static const String EQ = '=';
   static const String NE = '<>';
@@ -32,17 +32,17 @@ class Condition {
 /// Criteria provides a way to filter entities fetched from [Repository] based
 /// on certain conditions. Used in `findOne`, `find` and `count` methods of
 /// [Repository] interface.
-class Criteria<T> {
+class Filter<T> {
   final List<Condition> conditions = new List();
   int skip;
   int take;
 
   /// Default constructor.
-  Criteria();
+  Filter();
 
   /// Creates new criteria as a copy of [other].
-  factory Criteria.from(Criteria<T> other) {
-    return new Criteria<T>()
+  factory Filter.from(Filter<T> other) {
+    return new Filter<T>()
       ..conditions.addAll(other.conditions)
       ..skip = other.skip
       ..take = other.take;
@@ -80,8 +80,7 @@ class _EntityStub<T> {
       fields.add(field);
       return field;
     } else {
-      throw new CriteriaError(
-          'Only getters can be called in criteria builder.');
+      throw new FilterError('Only getters can be called in criteria builder.');
     }
   }
 

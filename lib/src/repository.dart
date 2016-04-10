@@ -27,16 +27,16 @@ abstract class Repository<T> {
   /// Returns `null` if there is no such entity.
   Future<T> get(id);
 
-  /// Finds entity matching provided [criteria].
-  Future<T> findOne(Criteria<T> criteria);
+  /// Finds entity matching provided [filter].
+  Future<T> findOne(Filter<T> filter);
 
-  /// Finds all entities matching provided [criteria].
-  Stream<T> find(Criteria<T> criteria);
+  /// Finds all entities matching provided [filter].
+  Stream<T> find(Filter<T> filter);
 
-  /// Returns total number of items in this repository. If [criteria] is
-  /// provided then returns total number of items satisfying this criteria
-  /// (the `skip` and `take` fields of criteria are ignored).
-  Future<int> count([Criteria<T> criteria]);
+  /// Returns total number of items in this repository. If [filter] is
+  /// provided then returns total number of items satisfying this filter
+  /// (the `skip` and `take` fields of the filter are ignored).
+  Future<int> count([Filter<T> filter]);
 
   /// Puts [entities] in this repository. This will either add entities to this
   /// repository or update them.

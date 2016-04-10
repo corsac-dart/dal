@@ -19,9 +19,9 @@ class InMemoryRepository<T> implements Repository<T> {
   }
 
   @override
-  Stream<T> find(Criteria<T> criteria) {
+  Stream<T> find(Filter<T> filter) {
     var filtered = items.where((i) {
-      for (var c in criteria.conditions) {
+      for (var c in filter.conditions) {
         var matcher = new _Matcher.createMatcherFor(c);
         if (!matcher.match(i)) {
           return false;
@@ -30,14 +30,14 @@ class InMemoryRepository<T> implements Repository<T> {
       return true;
     });
 
-    if (criteria.skip is int) filtered = filtered.skip(criteria.skip);
-    if (criteria.take is int) filtered = filtered.take(criteria.take);
+    if (filter.skip is int) filtered = filtered.skip(filter.skip);
+    if (filter.take is int) filtered = filtered.take(filter.take);
 
     return new Stream<T>.fromIterable(filtered);
   }
 
   @override
-  Future<T> findOne(Criteria<T> criteria) => find(criteria)
+  Future<T> findOne(Filter<T> filter) => find(filter)
       .first
       .catchError((_) => null, test: (error) => error is StateError);
 
@@ -54,13 +54,13 @@ class InMemoryRepository<T> implements Repository<T> {
   }
 
   @override
-  Future<int> count([Criteria<T> criteria]) {
-    if (criteria is Criteria) {
-      var tmpCriteria = new Criteria<T>.from(criteria);
-      tmpCriteria
+  Future<int> count([Filter<T> filter]) {
+    if (filter is Filter) {
+      var tmpFilter = new Filter<T>.from(filter);
+      tmpFilter
         ..skip = null
         ..take = null;
-      return find(tmpCriteria).length;
+      return find(tmpFilter).length;
     } else {
       return new Future.value(items.length);
     }

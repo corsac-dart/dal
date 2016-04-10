@@ -25,21 +25,21 @@ void main() {
     });
 
     test('it can filter entities with equals condition', () async {
-      var criteria = new Criteria<User>();
-      criteria.where((u) => u.id == 1);
-      var result = await repo.find(criteria).toList();
+      var filter = new Filter<User>();
+      filter.where((u) => u.id == 1);
+      var result = await repo.find(filter).toList();
       expect(result, hasLength(1));
       expect(result.first.id, equals(1));
 
-      var user = await repo.findOne(criteria);
+      var user = await repo.findOne(filter);
       expect(user, new isInstanceOf<User>());
       expect(user.id, 1);
     });
 
     test('it returns null in findOne if entity not found', () async {
-      var criteria = new Criteria<User>();
-      criteria.where((u) => u.id == 24353);
-      var result = await repo.findOne(criteria);
+      var filter = new Filter<User>();
+      filter.where((u) => u.id == 24353);
+      var result = await repo.findOne(filter);
       expect(result, isNull);
     });
   });
