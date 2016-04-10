@@ -1,4 +1,4 @@
-library corsac_stateless.tests.all;
+library corsac_dal.tests.all;
 
 import 'identity_map_test.dart' as im_test;
 import 'functions_test.dart' as functions_test;

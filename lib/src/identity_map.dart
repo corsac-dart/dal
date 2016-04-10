@@ -1,4 +1,4 @@
-part of corsac_stateless;
+part of corsac_dal;
 
 /// Identity Map keeps track of entities loaded into memory within single
 /// business transaction.

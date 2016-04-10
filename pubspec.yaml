@@ -1,7 +1,7 @@
-name: corsac_stateless
+name: corsac_dal
 version: 0.1.0-dev
-description: Experimental Repository layer for applications
-homepage: https://github.com/corsac-dart/stateless
+description: Database Abstraction Layer based on Repository pattern.
+homepage: https://github.com/corsac-dart/dal
 author: Anatoly Pulyaevskiy
 
 environment:

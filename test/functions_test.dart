@@ -1,8 +1,8 @@
-library corsac_stateless.tests.functions;
+library corsac_dal.tests.functions;
 
 import 'dart:mirrors';
 
-import 'package:corsac_stateless/corsac_stateless.dart';
+import 'package:corsac_dal/corsac_dal.dart';
 import 'package:test/test.dart';
 
 void main() {

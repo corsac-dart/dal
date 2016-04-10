@@ -1,10 +1,10 @@
 /// DI bindings for repository layer.
-library corsac_stateless.di;
+library corsac_dal.di;
 
 import 'dart:mirrors';
 
 import 'package:corsac_di/corsac_di.dart';
-import 'package:corsac_stateless/corsac_stateless.dart';
+import 'package:corsac_dal/corsac_dal.dart';
 
 bool isRepositoryType(id) {
   if (id is! Type) return false;

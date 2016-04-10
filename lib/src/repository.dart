@@ -1,4 +1,4 @@
-part of corsac_stateless;
+part of corsac_dal;
 
 class _Identity {
   const _Identity();

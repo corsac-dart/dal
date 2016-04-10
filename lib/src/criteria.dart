@@ -1,4 +1,4 @@
-part of corsac_stateless;
+part of corsac_dal;
 
 /// Error thrown for invalid operations in [Criteria].
 class CriteriaError {

@@ -1,4 +1,4 @@
-library corsac_stateless;
+library corsac_dal;
 
 import 'dart:async';
 import 'dart:mirrors';

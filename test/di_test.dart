@@ -1,10 +1,10 @@
-library corsac_stateless.di.tests;
+library corsac_dal.di.tests;
 
 import 'dart:mirrors';
 
 import 'package:corsac_di/corsac_di.dart';
-import 'package:corsac_stateless/corsac_stateless.dart';
-import 'package:corsac_stateless/di.dart';
+import 'package:corsac_dal/corsac_dal.dart';
+import 'package:corsac_dal/di.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -72,7 +72,8 @@ class Account {}
 abstract class UserRepository implements Repository<User> {}
 
 class UserMysqlRepository extends UserRepository {
-  @override noSuchMethod(Invocation invocation) {}
+  @override
+  noSuchMethod(Invocation invocation) {}
 }
 
 class UserIdentityMapRepositoryDecorator extends IdentityMapRepositoryDecorator

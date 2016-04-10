@@ -1,4 +1,4 @@
-part of corsac_stateless;
+part of corsac_dal;
 
 /// Repository which stores entities in memory.
 class InMemoryRepository<T> implements Repository<T> {
