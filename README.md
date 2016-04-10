@@ -1,5 +1,8 @@
 # Corsac DAL
 
+[![Build Status](https://travis-ci.org/corsac-dart/dal.svg?branch=master)](https://travis-ci.org/corsac-dart/dal)
+[![Code Coverage](https://codecov.io/github/corsac-dart/dal/coverage.svg?branch=master)](https://codecov.io/github/corsac-dart/dal?branch=master)
+
 Database abstraction layer for applications based on Repository pattern.
 
 This library is not an attempt to implement an ORM framework, in fact,
