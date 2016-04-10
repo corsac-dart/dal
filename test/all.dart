@@ -1,11 +1,15 @@
-library corsac_stateless.tests.all;
+library corsac_dal.tests.all;
 
-import 'data_gateway_test.dart' as dg_test;
 import 'identity_map_test.dart' as im_test;
-import 'model_test.dart' as model_test;
+import 'functions_test.dart' as functions_test;
+import 'repository_test.dart' as repository_test;
+import 'di_test.dart' as di_test;
+import 'filter_test.dart' as filter_test;
 
 void main() {
-  dg_test.main();
   im_test.main();
-  model_test.main();
+  functions_test.main();
+  repository_test.main();
+  di_test.main();
+  filter_test.main();
 }
