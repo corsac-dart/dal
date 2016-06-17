@@ -65,6 +65,25 @@ class InMemoryRepository<T> implements Repository<T> {
       return new Future.value(items.length);
     }
   }
+
+  @override
+  Stream<Iterable<T>> findBatched(Filter<T> filter, int maxBatchSize) {
+    var filtered = items.where((i) {
+      for (var c in filter.conditions) {
+        var matcher = new _Matcher.createMatcherFor(c);
+        if (!matcher.match(i)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    if (filter.skip is int) filtered = filtered.skip(filter.skip);
+    if (filter.take is int) filtered = filtered.take(filter.take);
+
+    return new Stream<Iterable<T>>.fromIterable(
+        partition(filtered, maxBatchSize));
+  }
 }
 
 abstract class _Matcher {
