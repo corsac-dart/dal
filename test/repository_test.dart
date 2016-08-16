@@ -2,9 +2,8 @@ library corsac_dal.tests.repository;
 
 import 'package:corsac_dal/corsac_dal.dart';
 import 'package:test/test.dart';
-import 'dart:async';
 
-Future main() {
+void main() {
   group('In-memory Repository:', () {
     InMemoryRepository<User> repo;
 
@@ -42,15 +41,6 @@ Future main() {
       filter.where((u) => u.id == 24353);
       var result = await repo.findOne(filter);
       expect(result, isNull);
-    });
-
-    test('it can batch objects', () async {
-      var filter = new Filter<User>();
-      var result = await repo.findBatched(filter, 2).toList();
-      expect(result, hasLength(2));
-      expect(result.first, isList);
-      expect(result.first, hasLength(2));
-      expect(result.last, hasLength(1));
     });
   });
 }

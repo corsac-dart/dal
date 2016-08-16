@@ -29,9 +29,9 @@ class Condition {
   toString() => "Condition(${key} ${predicate} $value)";
 }
 
-/// Criteria provides a way to filter objects fetched from [Repository] based
-/// on certain conditions. Used in `findOne`, `find`, `findBatched` and `count`
-/// methods of [Repository] interface.
+/// Criteria provides a way to filter entities fetched from [Repository] based
+/// on certain conditions. Used in `findOne`, `find` and `count` methods of
+/// [Repository] interface.
 class Filter<T> {
   final List<Condition> conditions = new List();
   int skip;
@@ -49,7 +49,7 @@ class Filter<T> {
   }
 
   /// Adds a condition to this criteria. Provides convenient way for defining
-  /// basic conditions (`==`, `<`, `<=`, `>`, `>=`) based on values of object
+  /// basic conditions (`==`, `<`, `<=`, `>`, `>=`) based on values of entity
   /// fields.
   ///
   ///     var criteria = new Criteria<User>();
@@ -60,15 +60,15 @@ class Filter<T> {
   ///
   ///     var criteria = new Criteria<User>();
   ///     criteria.conditions.add(new Condition('name', 'John', Condition.EQ));
-  void where(bool test(T object)) {
-    var object = new _ObjectStub<T>();
-    test(object); // dynamic proxies... where are you?
-    conditions.addAll(object.conditions);
+  void where(bool test(T entity)) {
+    var entity = new _EntityStub<T>();
+    test(entity); // dynamic proxies... where are you?
+    conditions.addAll(entity.conditions);
   }
 }
 
 @proxy
-class _ObjectStub<T> {
+class _EntityStub<T> {
   final List<_FieldStub> fields = new List();
   List<Condition> _conditions;
 
