@@ -3,7 +3,11 @@
 [![Build Status](https://travis-ci.org/corsac-dart/dal.svg?branch=master)](https://travis-ci.org/corsac-dart/dal)
 [![Code Coverage](https://codecov.io/github/corsac-dart/dal/coverage.svg?branch=master)](https://codecov.io/github/corsac-dart/dal?branch=master)
 
-Database abstraction layer for applications. This library is based on
+> Status: This library is an experiment and currently **not** being actively worked on,
+> that's why is has not been uploaded to Pub. I'm keeping it online because I'm hoping
+> to get back to it at some point in near future.
+
+Data Access Layer for applications. This library is based on
 Repository pattern.
 
 It is _not_ an attempt to implement an ORM framework, in fact,
